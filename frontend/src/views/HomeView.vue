@@ -55,7 +55,11 @@
           <h2>热门目的地</h2>
         </div>
         <!-- 跳转到热门景点页面 -->
-        <el-button text type="primary" @click="router.push({ name: 'attractions' })">
+        <el-button
+          text
+          type="primary"
+          @click="router.push({ name: 'attractions' })"
+        >
           查看更多
           <el-icon><ArrowRight /></el-icon>
         </el-button>
@@ -82,7 +86,9 @@
             >
               <div
                 class="cover"
-                :style="{ backgroundImage: `url(${item.image_url || defaultCover})` }"
+                :style="{
+                  backgroundImage: `url(${item.image_url || defaultCover})`,
+                }"
               >
                 <span class="rating">
                   <el-icon><StarFilled /></el-icon>
@@ -102,13 +108,19 @@
                 <div class="card-footer">
                   <div class="price">
                     <small>门票</small>
-                    <strong>¥{{ Number(item.ticket_price || 0).toFixed(0) }}</strong>
+                    <strong
+                      >¥{{ Number(item.ticket_price || 0).toFixed(0) }}</strong
+                    >
                   </div>
                   <div class="card-actions">
                     <!-- 收藏按钮 -->
-                    <el-button size="small" :type="item.is_favorite ? 'primary' : 'default'" @click="toggleFavorite(item)">
+                    <el-button
+                      size="small"
+                      :type="item.is_favorite ? 'primary' : 'default'"
+                      @click="toggleFavorite(item)"
+                    >
                       <el-icon><Star /></el-icon>
-                      {{ item.is_favorite ? '已收藏' : '收藏' }}
+                      {{ item.is_favorite ? "已收藏" : "收藏" }}
                     </el-button>
                     <!-- 了解详情按钮 -->
                     <el-button size="small" @click="viewAttraction(item.id)">
@@ -132,7 +144,11 @@
           <h2>精选游记</h2>
         </div>
         <!-- 查看更多按钮 -->
-        <el-button text type="primary" @click="router.push({name: 'travel-notes'})">
+        <el-button
+          text
+          type="primary"
+          @click="router.push({ name: 'travel-notes' })"
+        >
           查看更多
           <el-icon><ArrowRight /></el-icon>
         </el-button>
@@ -167,10 +183,13 @@
                 <h3>{{ note.title }}</h3>
                 <p>{{ note.content.slice(0, 120) }}...</p>
                 <div class="note-footer">
-                  <el-tag size="small" round>{{ note.attraction_name || "自由行" }}</el-tag>
                   <div class="stats">
-                    <span><el-icon><View /></el-icon>{{ note.views }}</span>
-                    <span><el-icon><Pointer /></el-icon>{{ note.likes }}</span>
+                    <span
+                      ><el-icon><View /></el-icon>{{ note.views }}</span
+                    >
+                    <span
+                      ><el-icon><Pointer /></el-icon>{{ note.likes }}</span
+                    >
                   </div>
                 </div>
                 <el-button
@@ -245,14 +264,14 @@ const checkAuthStatus = async () => {
 // 检查景点收藏状态
 const checkFavoriteStatus = async (attractions) => {
   if (!isLoggedIn.value) return;
-  
+
   try {
     for (const attraction of attractions) {
       const response = await attractionApi.checkFavorite(attraction.id);
       attraction.is_favorite = response.data.is_favorite || false;
     }
   } catch (error) {
-    console.error('检查收藏状态失败:', error);
+    console.error("检查收藏状态失败:", error);
   }
 };
 
@@ -272,7 +291,7 @@ const loadAttractions = async () => {
     const params = { ...filters, limit: 8 };
     const { data } = await attractionApi.list(params);
     attractions.value = data?.data?.attractions || [];
-    
+
     // 检查登录状态和收藏状态
     await checkAuthStatus();
     await checkFavoriteStatus(attractions.value);
@@ -303,29 +322,29 @@ const resetFilters = () => {
 };
 
 const viewAttraction = (id) => {
-  showMessage("暂未实现景点详情页，可直接查看游记内容哦", "info");
+  router.push({ name: "AttractionDetail", params: { id } });
 };
 
 // 收藏/取消收藏景点
 const toggleFavorite = async (item) => {
   // 检查登录状态
   if (!isLoggedIn.value) {
-    showMessage('请先登录后再收藏景点', 'warning');
+    showMessage("请先登录后再收藏景点", "warning");
     return;
   }
-  
+
   try {
     if (item.is_favorite) {
       await attractionApi.unfavorite(item.id);
       item.is_favorite = false;
-      showMessage('已取消收藏', 'success');
+      showMessage("已取消收藏", "success");
     } else {
       await attractionApi.favorite(item.id);
       item.is_favorite = true;
-      showMessage('收藏成功', 'success');
+      showMessage("收藏成功", "success");
     }
   } catch (error) {
-    showMessage('操作失败，请重试', 'error');
+    showMessage("操作失败，请重试", "error");
   }
 };
 
@@ -481,6 +500,26 @@ onMounted(() => {
   width: 100%;
   height: 200px;
   object-fit: cover;
+}
+
+/* 修复精选游记浏览量和点赞量间距问题 */
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 增加图标和数字之间的间距 */
+}
+
+.stats span {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 图标和数字之间的间距 */
+  color: #64748b;
+  font-size: 14px;
+}
+
+.stats .el-icon {
+  font-size: 16px;
+  color: #94a3b8;
 }
 
 /* 弹窗淡入淡出动画 */

@@ -5,6 +5,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './router'
 import './assets/main.css'
+import "./assets/message.css";
 
 const app = createApp(App)
 

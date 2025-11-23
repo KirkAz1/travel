@@ -109,7 +109,7 @@ const login = async (req, res) => {
         // 生成JWT token
         const token = jwt.sign(
             { id: user.id, username: user.username, email: user.email },
-            process.env.JWT_SECRET || 'your-secret-key',
+            process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
@@ -164,9 +164,83 @@ const getCurrentUser = async (req, res) => {
     }
 };
 
+// 修改密码
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user.id;
+
+        // 验证输入
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                error_code: 'MISSING_FIELDS',
+                message: '请填写当前密码和新密码'
+            });
+        }
+
+        // 验证新密码长度
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                error_code: 'INVALID_PASSWORD',
+                message: '新密码长度至少为6位'
+            });
+        }
+
+        // 获取当前用户的密码
+        const [users] = await pool.execute(
+            'SELECT password FROM users WHERE id = ?',
+            [userId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error_code: 'USER_NOT_FOUND',
+                message: '用户不存在'
+            });
+        }
+
+        const user = users[0];
+
+        // 验证当前密码是否正确
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidPassword) {
+            return res.status(401).json({
+                success: false,
+                error_code: 'INVALID_CURRENT_PASSWORD',
+                message: '当前密码错误'
+            });
+        }
+
+        // 加密新密码
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // 更新密码
+        await pool.execute(
+            'UPDATE users SET password = ? WHERE id = ?',
+            [hashedPassword, userId]
+        );
+
+        res.json({
+            success: true,
+            message: '密码修改成功'
+        });
+    } catch (error) {
+        console.error('修改密码错误:', error);
+        res.status(500).json({
+            success: false,
+            error_code: 'SERVER_ERROR',
+            message: '服务器错误'
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
-    getCurrentUser
+    getCurrentUser,
+    changePassword
 };
 

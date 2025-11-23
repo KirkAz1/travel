@@ -33,6 +33,16 @@
               <el-icon><Star /></el-icon>
               {{ isFavorited ? "已收藏" : "收藏" }}
             </el-button>
+            <el-button
+              v-if="authStore.state.user?.id === note.user_id"
+              type="danger"
+              plain
+              @click="openDeleteTravelNoteDialog"
+              :loading="deleteLoading"
+            >
+              <el-icon><Delete /></el-icon>
+              删除游记
+            </el-button>
           </div>
         </div>
       </div>
@@ -159,6 +169,38 @@
         </template>
       </el-dialog>
     </transition>
+
+    <!-- 删除游记确认弹窗 + 动画 -->
+    <transition name="fade-dialog">
+      <el-dialog
+        v-model="deleteTravelNoteDialogVisible"
+        title="删除确认"
+        width="400px"
+        destroy-on-close
+      >
+        <div style="text-align: center; padding: 20px 0">
+          <el-icon size="48" color="#e6a23c"><Warning /></el-icon>
+          <p style="margin: 16px 0; font-size: 16px; color: #606266">
+            确定要删除这篇游记吗？
+          </p>
+          <p style="margin: 0; font-size: 14px; color: #909399">
+            此操作不可恢复
+          </p>
+        </div>
+        <template #footer>
+          <el-button @click="deleteTravelNoteDialogVisible = false"
+            >取消</el-button
+          >
+          <el-button
+            type="danger"
+            @click="deleteTravelNote"
+            :loading="deleteLoading"
+          >
+            确定删除
+          </el-button>
+        </template>
+      </el-dialog>
+    </transition>
   </div>
 </template>
 
@@ -166,9 +208,10 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { travelNoteApi, commentApi, favoriteApi, likeApi } from "@/api";
 import { useAuthStore } from "@/stores/auth";
-import { Pointer, Star } from "@element-plus/icons-vue";
+import { Pointer, Star, Delete, Warning } from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -186,6 +229,8 @@ const isLiked = ref(false);
 const likeLoading = ref(false);
 const deleteDialogVisible = ref(false);
 const deleteTargetId = ref(null);
+const deleteLoading = ref(false);
+const deleteTravelNoteDialogVisible = ref(false);
 
 // 通用成功弹窗
 const successDialogVisible = ref(false);
@@ -318,20 +363,52 @@ const submitComment = async () => {
   }
 };
 
-const openDeleteDialog = (id) => {
-  deleteTargetId.value = id;
+const openDeleteDialog = (commentId) => {
+  deleteTargetId.value = commentId;
   deleteDialogVisible.value = true;
 };
 
 const confirmDelete = async () => {
   try {
     await commentApi.remove(deleteTargetId.value);
-    showSuccess("评论已删除");
-    loadComments();
-  } catch (e) {
-    showSuccess("删除失败");
-  } finally {
+    successMessage.value = "评论删除成功";
+    successDialogVisible.value = true;
     deleteDialogVisible.value = false;
+    loadComments();
+  } catch (error) {
+    console.error("删除评论错误:", error);
+    ElMessage.error(error.response?.data?.message || "删除失败");
+  }
+};
+
+// 删除游记相关函数
+const openDeleteTravelNoteDialog = () => {
+  deleteTravelNoteDialogVisible.value = true;
+};
+
+const deleteTravelNote = async () => {
+  try {
+    deleteLoading.value = true;
+    const response = await travelNoteApi.remove(route.params.id);
+
+    if (response.data.success) {
+      ElMessage.success("游记删除成功");
+      deleteTravelNoteDialogVisible.value = false;
+      router.push("/travel-notes");
+    }
+  } catch (error) {
+    console.error("删除游记错误:", error);
+    const errorMessage = error.response?.data?.message || "删除失败";
+
+    if (error.response?.data?.error_code === "FORBIDDEN") {
+      ElMessage.error("无权删除此游记");
+    } else if (error.response?.data?.error_code === "NOTE_NOT_FOUND") {
+      ElMessage.error("游记不存在");
+    } else {
+      ElMessage.error(errorMessage);
+    }
+  } finally {
+    deleteLoading.value = false;
   }
 };
 

@@ -1,0 +1,35 @@
+.el-message {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  transition: all 0.25s ease-out !important;
+}
+
+.el-message.is-center {
+  text-align: center;
+}
+
+.el-message--success,
+.el-message--warning,
+.el-message--error,
+.el-message--info {
+  border-radius: 8px !important;
+  padding: 12px 20px !important;
+}
+
+/* 显示时的动画 */
+.el-message.fade-in-linear-enter-active,
+.el-message.fade-in-linear-leave-active {
+  transition: all 0.25s ease-out !important;
+}
+
+.el-message.fade-in-linear-enter-from,
+.el-message.fade-in-linear-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+.el-message.fade-in-linear-enter-to,
+.el-message.fade-in-linear-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

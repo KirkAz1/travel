@@ -56,9 +56,20 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="router.push('/favorites')">
+                <el-dropdown-item @click="router.push('/travel-notes/create')">
+                  <el-icon><EditPen /></el-icon>
+                  发布游记
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="router.push('/favorites')">
                   <el-icon><StarFilled /></el-icon>
                   我的收藏
+                </el-dropdown-item>
+                <el-dropdown-item
+                  divided
+                  @click="router.push({ name: 'change-password-direct' })"
+                >
+                  <el-icon><Lock /></el-icon>
+                  修改密码
                 </el-dropdown-item>
                 <el-dropdown-item divided @click="showLogoutDialog">
                   <el-icon><SwitchButton /></el-icon>
@@ -72,10 +83,7 @@
     </div>
 
     <!-- 退出登录弹窗 -->
-    <LogoutDialog 
-      v-model="logoutDialogVisible" 
-      @confirm="handleLogout" 
-    />
+    <LogoutDialog v-model="logoutDialogVisible" @confirm="handleLogout" />
   </header>
 </template>
 
@@ -83,13 +91,19 @@
 import { ref, inject } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { ArrowDown, StarFilled, SwitchButton } from "@element-plus/icons-vue";
+import {
+  ArrowDown,
+  StarFilled,
+  SwitchButton,
+  Lock,
+  EditPen,
+} from "@element-plus/icons-vue";
 import LogoutDialog from "./LogoutDialog.vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
 const logoutDialogVisible = ref(false);
-const message = inject('message');
+const message = inject("message");
 
 const goLogin = () => {
   router.push({ name: "login" });
@@ -242,7 +256,7 @@ const handleLogout = () => {
     justify-content: center;
     flex-wrap: wrap;
   }
-  
+
   .login-btn,
   .register-btn {
     padding: 6px 16px !important;

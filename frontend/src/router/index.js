@@ -4,9 +4,12 @@ import LoginView from '@/views/auth/LoginView.vue';
 import RegisterView from '@/views/auth/RegisterView.vue';
 import TravelNoteDetail from '@/views/travel/TravelNoteDetail.vue';
 import FavoritesView from '@/views/user/FavoritesView.vue';
+import ProfileView from '@/views/user/ProfileView.vue';
+import ChangePasswordView from '@/views/user/ChangePasswordView.vue';
 import AttractionsPage from '@/views/attraction/AttractionsPage.vue';
 import { useAuthStore } from '@/stores/auth';
 import TravelNotesView from '@/views/travel/TravelNotesView.vue';
+import CreateTravelNoteView from '@/views/travel/CreateTravelNoteView.vue';
 
 
 const router = createRouter({
@@ -15,6 +18,12 @@ const router = createRouter({
     return { top: 0 };
   },
   routes: [
+    {
+      path: '/change-password',
+      name: 'change-password-direct',
+      component: ChangePasswordView,
+      meta: { requiresAuth: true, title: '修改密码 - 游迹全国' }
+    },
     {
       path: '/',
       name: 'home',
@@ -46,6 +55,20 @@ const router = createRouter({
       meta: { requiresAuth: true, title: '我的收藏 - 游迹全国' },
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: { requiresAuth: true, title: '个人中心 - 游迹全国' },
+      children: [
+        {
+          path: 'change-password',
+          name: 'change-password',
+          component: ChangePasswordView,
+          meta: { requiresAuth: true, title: '修改密码 - 游迹全国' }
+        }
+      ]
+    },
+    {
       path: '/attractions',
       name: 'attractions',
       component: AttractionsPage,
@@ -61,6 +84,12 @@ const router = createRouter({
       name: 'travel-notes',
       component: TravelNotesView,
       meta: { title: '游记列表 - 游迹全国' },
+    },
+    {
+      path: '/travel-notes/create',
+      name: 'create-travel-note',
+      component: CreateTravelNoteView,
+      meta: { requiresAuth: true, title: '发布游记 - 游迹全国' },
     },
     {
       path: '/:pathMatch(.*)*',

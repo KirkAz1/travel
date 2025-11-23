@@ -11,6 +11,9 @@ export const authApi = {
     me() {
         return apiClient.get('/auth/me');
     },
+    changePassword(payload) {
+        return apiClient.post('/auth/change-password', payload);
+    },
 };
 
 // 景点

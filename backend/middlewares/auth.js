@@ -3,9 +3,14 @@ const jwt = require('jsonwebtoken');
 // JWT认证中间件
 const authenticate = (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
+        const authHeader = req.headers.authorization;
+        console.log('Authorization header:', authHeader);
+
+        const token = authHeader?.split(' ')[1]; // Bearer <token>
+        console.log('Extracted token:', token);
 
         if (!token) {
+            console.log('No token provided');
             return res.status(401).json({
                 success: false,
                 error_code: 'NO_TOKEN',
@@ -13,10 +18,17 @@ const authenticate = (req, res, next) => {
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const jwtSecret = process.env.JWT_SECRET;
+        console.log('JWT secret used for verification:', jwtSecret ? '已配置' : '未配置');
+
+        const decoded = jwt.verify(token, jwtSecret);
+        console.log('Token decoded successfully:', decoded);
+
         req.user = decoded; // 将用户信息添加到请求对象
         next();
     } catch (error) {
+        console.error('Token verification failed:', error.message);
+        console.error('JWT secret:', process.env.JWT_SECRET);
         return res.status(401).json({
             success: false,
             error_code: 'INVALID_TOKEN',
